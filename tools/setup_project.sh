@@ -1,10 +1,9 @@
 #!/bin/bash
 
 # ==========================================
-# プロジェクト立ち上げ自動化スクリプト (修正版)
+# プロジェクト立ち上げ自動化スクリプト (階層修正版)
 # ==========================================
 
-# エラーが発生したら即停止する設定を追加
 set -e
 
 # 設定値
@@ -28,19 +27,41 @@ if ! gh auth status >/dev/null 2>&1; then
     exit 1
 fi
 
-# git credentialの設定 (重要: Privateリポジトリ操作のため)
 gh auth setup-git
 
-echo "--------------------------------------------------"
-echo "管理者用PATを入力してください (Secret登録用)"
-echo "--------------------------------------------------"
-read -sp "PAT: " ADMIN_TOKEN
-echo ""
+# ========================================================
+# PAT取得ロジック (秘密ファイル -> 手動入力)
+# ========================================================
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+PAT_FILE="$SCRIPT_DIR/.secret_pat"
+
+if [ -f "$PAT_FILE" ]; then
+    ADMIN_TOKEN=$(cat "$PAT_FILE" | tr -d '\r\n')
+    if [ -n "$ADMIN_TOKEN" ]; then
+        echo "✅ 秘密ファイル(.secret_pat)からPATを自動取得しました。"
+    fi
+fi
 
 if [ -z "$ADMIN_TOKEN" ]; then
-    echo "エラー: PATが入力されませんでした。"
+    echo "--------------------------------------------------"
+    echo "管理者用PAT(Personal Access Token)を入力してください。"
+    echo "--------------------------------------------------"
+    read -sp "PAT: " ADMIN_TOKEN
+    echo ""
+fi
+
+if [ -z "$ADMIN_TOKEN" ]; then
+    echo "エラー: PATが取得できませんでした。処理を中止します。"
     exit 1
 fi
+
+# ========================================================
+# ★ここが修正ポイント: 作業ディレクトリの移動
+# ========================================================
+# .github/tools/ にあるスクリプトの 2つ上の階層(ワークスペースルート)へ移動
+WORK_DIR="$SCRIPT_DIR/../.."
+cd "$WORK_DIR" || exit
+echo "作業場所を移動しました: $(pwd)"
 
 echo "🚀 プロジェクト立ち上げを開始します..."
 
@@ -61,10 +82,8 @@ gh variable set PORTAL_REPO_NAME --body "$PORTAL_NAME" --repo "$ORG_NAME/$APP_NA
 echo "Configuring Subtree..."
 cd "$PORTAL_NAME"
 
-# リモート追加
+# リモート追加 & Fetch
 git remote add "$APP_NAME" "https://github.com/$ORG_NAME/$APP_NAME.git"
-
-# ★修正点: まずFetchして接続確認を行う
 echo "Fetching app repository..."
 git fetch "$APP_NAME" main
 
@@ -76,7 +95,7 @@ git subtree add --prefix="apps/$APP_NAME" "$APP_NAME" main --squash -m "init: li
 git push origin main
 
 cd ..
-# rm -rf "$PORTAL_NAME" # 確認のため残すことを推奨
+# rm -rf "$PORTAL_NAME" # 必要に応じて
 
 echo "=========================================="
 echo "✅ セットアップ完了！"

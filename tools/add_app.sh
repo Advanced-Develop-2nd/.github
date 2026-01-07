@@ -25,14 +25,38 @@ if ! gh auth status >/dev/null 2>&1; then
 fi
 
 # Secret用のPAT入力
-echo "--------------------------------------------------"
-echo "管理者用PAT(Personal Access Token)を入力してください。"
-echo "--------------------------------------------------"
-read -sp "PAT: " ADMIN_TOKEN
-echo ""
+# ========================================================
+# PAT取得ロジック (秘密ファイル -> 手動入力)
+# ========================================================
 
+# スクリプト自身のディレクトリを取得 (Windows/WSL両対応)
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+PAT_FILE="$SCRIPT_DIR/.secret_pat"
+
+# 1. 秘密ファイル (.secret_pat) をチェック
+if [ -f "$PAT_FILE" ]; then
+    # ファイルの中身を読み込み (trでWindows特有の改行コード \r を削除)
+    ADMIN_TOKEN=$(cat "$PAT_FILE" | tr -d '\r\n')
+    
+    if [ -n "$ADMIN_TOKEN" ]; then
+        echo "✅ 秘密ファイル(.secret_pat)からPATを自動取得しました。"
+    else
+        echo "⚠️ .secret_pat ファイルが空です。"
+    fi
+fi
+
+# 2. 取得できていなければ手動入力を要求
 if [ -z "$ADMIN_TOKEN" ]; then
-    echo "エラー: PATが入力されませんでした。"
+    echo "--------------------------------------------------"
+    echo "管理者用PAT(Personal Access Token)を入力してください。"
+    echo "--------------------------------------------------"
+    read -sp "PAT: " ADMIN_TOKEN
+    echo ""
+fi
+
+# 入力値チェック
+if [ -z "$ADMIN_TOKEN" ]; then
+    echo "エラー: PATが取得できませんでした。処理を中止します。"
     exit 1
 fi
 
