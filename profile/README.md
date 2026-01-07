@@ -5,8 +5,8 @@
 
 ### 📘 開発者向けリソース
 * **[運用ガイドライン](<ガイドラインPDFまたはWikiへのリンク>)**: 開発フロー、ブランチ命名規則はこちら。
-* **[テンプレート: Portal (親)](https://github.com/ORG_NAME/temp_knowledge_portal)**: プロジェクト管理用
-* **[テンプレート: App (子)](https://github.com/ORG_NAME/temp_knowledge_app)**: アプリケーション開発用
+* **[テンプレート: Portal (親)](https://github.com/ORG_NAME/temp_portal)**: プロジェクト管理用
+* **[テンプレート: App (子)](https://github.com/ORG_NAME/temp_app)**: アプリケーション開発用
 
 ### ⚡ クイックスタート (管理者・PM向け)
 新規プロジェクト立ち上げ時は、手動設定せず以下のコマンドを使用してください。
