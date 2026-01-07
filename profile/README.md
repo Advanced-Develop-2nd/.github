@@ -1,33 +1,62 @@
-# AZAPA Engineering
+# Advanced-Develop-2nd Engineering
 
 ## 🚀 ナレッジ共有型プロジェクト運用ポータル
-我々は「Docs as Code」を推進し、コードとドキュメントの完全一致を目指します。
+[cite_start]当組織では「Docs as Code」を推進し、コードとドキュメントの完全一致を目指します[cite: 183, 232]。
+[cite_start]Git Subtree と GitHub Actions を活用した自動連携フローにより、属人化を排除し、常に最新のナレッジが共有される状態を保ちます[cite: 371, 585]。
 
-### 📘 開発者向けリソース
-* **[運用ガイドライン](<ガイドラインPDFまたはWikiへのリンク>)**: 開発フロー、ブランチ命名規則はこちら。
-* **[テンプレート: Portal (親)](https://github.com/ORG_NAME/temp_portal)**: プロジェクト管理用
-* **[テンプレート: App (子)](https://github.com/ORG_NAME/temp_app)**: アプリケーション開発用
+---
 
-### ⚡ クイックスタート (管理者・PM向け)
-新規プロジェクト立ち上げ時は、手動設定せず以下のコマンドを使用してください。
-（Secret設定とSubtree連携を自動化します）
+### 📚 運用ガイドライン & リソース
+開発ルールや運用フローは、リポジトリ内の以下のドキュメントを参照してください。
 
+#### 📄 ガイドライン・手順書
+* **[運用ガイドライン (PDF)](./guidelines/ナレッジ共有型プロジェクト運用ガイドライン.pdf)**
+    * [cite_start]システム構成、ブランチ戦略、レビュー基準、自動化フローの詳細[cite: 228]。
+* **[日常運用手順書 (PDF)](./guidelines/ナレッジ共有型プロジェクト運用手順書_日常運用.pdf)**
+    * [cite_start]開発者の日々のタスク着手からPR作成までのチートシート[cite: 59, 65]。
+
+#### 🛠 テンプレートリポジトリ
+* **[temp_portal](https://github.com/Advanced-Develop-2nd/temp_portal)** (予定)
+    * [cite_start]親リポジトリ用：プロジェクト管理・ドキュメント統合・デプロイ[cite: 241]。
+* **[temp_app](https://github.com/Advanced-Develop-2nd/temp_app)** (予定)
+    * [cite_start]子リポジトリ用：アプリケーションソースコード・詳細仕様書[cite: 244]。
+
+---
+
+### ⚡ プロジェクト立ち上げ手順 (管理者・PM向け)
+新規プロジェクトを開始する際は、**手動でリポジトリを作成せず**、以下の自動化スクリプトを使用してください。
+[cite_start]「リポジトリ作成」「Secret(PAT)設定」「Subtree連携」を一括で自動実行します[cite: 370, 371]。
+
+#### 1. 準備 (初回のみ)
+この管理リポジトリをローカルにクローンし、スクリプトに実行権限を付与します。
 ```bash
-# セットアップスクリプトの実行
-./setup_project.sh [新規プロジェクト名] [アプリ名]
+gh repo clone Advanced-Develop-2nd/.github
+cd .github
+chmod +x tools/setup_project.sh
 ```
 
+#### 2. セットアップ実行
+
+```bash
+# 使用法： ./tools/setup_project.sh <新規ポータル名> <新規アプリ名>
+./tools/setup_project.sh ProjectA_portal ProjectA_app
+```
+
+*※ 実行中に管理者用PAT（Personal Access Token）の入力を求められます。*
+
+---
+
+### 🔄 自動連携アーキテクチャ概要
+
+コスト０円（Freeプラン）かつセキュアな運用のために、以下のフローで自動化しています。
+
+1. **Dev(子リポジトリ)**： 開発者がPRをマージ -> 親リポジトリへ「更新通知」を送信。
+2. **Sync(親リポジトリ)**： 通知を受信 -> 自動で `git subtree pull` を実行し、ドキュメントを取り込む。
+3. **Check**： 親リポ塩リに「同期用PR」が自動生成されるので、管理者がマージする。
+
+---
+
 ### 🆘 緊急連絡先
-- システム管理者： 藤平
-- インシデント報告: tomoki-fujihira@azapa-eng.co.jp
 
-<!--
-
-**Here are some ideas to get you started:**
-
-🙋‍♀️ A short introduction - what is your organization all about?
-🌈 Contribution guidelines - how can the community get involved?
-👩‍💻 Useful resources - where can the community find your docs? Is there anything else the community should know?
-🍿 Fun facts - what does your team eat for breakfast?
-🧙 Remember, you can do mighty things with the power of [Markdown](https://docs.github.com/github/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax)
--->
+- システム管理者： [藤平](https://github.com/fujihira-azapaeng)
+- インシデント報告：[tomoki-fujihira@azapa-eng.co.jp](mailto:)
