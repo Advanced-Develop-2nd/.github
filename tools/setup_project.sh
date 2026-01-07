@@ -27,7 +27,7 @@ if ! gh auth status >/dev/null 2>&1; then
     exit 1
 fi
 
-# Secret用のPAT入力（セキュリティのため実行時に入力）
+# Secret用のPAT入力
 echo "--------------------------------------------------"
 echo "各リポジトリに登録する管理者用PAT(Personal Access Token)を入力してください。"
 echo "※入力内容は画面に表示されません"
@@ -51,28 +51,30 @@ gh repo create "$ORG_NAME/$APP_NAME" --template "$ORG_NAME/$TEMPLATE_APP" --priv
 
 # 2. Secret (ORG_ADMIN_TOKEN) の登録
 echo "Setting Secrets..."
-# 親リポジトリに登録
 gh secret set ORG_ADMIN_TOKEN -b "$ADMIN_TOKEN" --repo "$ORG_NAME/$PORTAL_NAME"
-# 子リポジトリに登録
 gh secret set ORG_ADMIN_TOKEN -b "$ADMIN_TOKEN" --repo "$ORG_NAME/$APP_NAME"
 
-# 3. Subtree連携 (ローカル操作)
+# 3. ★Variable (PORTAL_REPO_NAME) の登録 [今回追加箇所]
+# 子リポジトリが通知先を知るために、ポータル名を環境変数として登録します
+echo "Setting Repository Variables..."
+gh variable set PORTAL_REPO_NAME --body "$PORTAL_NAME" --repo "$ORG_NAME/$APP_NAME"
+
+# 4. Subtree連携 (ローカル操作)
 echo "Configuring Subtree..."
 cd "$PORTAL_NAME" || exit
 
 # アプリリポジトリをリモートとして追加
 git remote add "$APP_NAME" "https://github.com/$ORG_NAME/$APP_NAME.git"
 
-# Subtreeとして追加 (Squashオプション付き)
-# 初回は履歴がないためエラーになる場合を考慮し、空コミットがある前提か、または単に追加を試みる
+# Subtreeとして追加
+# 初回連携用の空コミットを作成
 git subtree add --prefix="apps/$APP_NAME" "$APP_NAME" main --squash -m "init: link $APP_NAME"
 
 # 変更を親リポジトリへPush
 git push origin main
 
 cd ..
-# 作業用フォルダの削除（必要に応じてコメントアウトを外してください）
-# rm -rf "$PORTAL_NAME"
+rm -rf "$PORTAL_NAME" # 作業用ディレクトリ削除
 
 echo "=========================================="
 echo "✅ セットアップ完了！"
