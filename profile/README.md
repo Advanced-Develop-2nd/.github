@@ -44,6 +44,13 @@ chmod +x tools/setup_project.sh
 
 *※ 実行中に管理者用PAT（Personal Access Token）の入力を求められます。*
 
+#### 3. 子リポジトリの追加
+
+```bash
+# 使用法： ./tools/add_app.sh <既存ポータル名> <新規アプリ名>
+./tools/add_app.sh ProjectA_portal ProjectB_app
+```
+
 ---
 
 ### 🔄 自動連携アーキテクチャ概要
