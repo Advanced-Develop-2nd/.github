@@ -1,8 +1,10 @@
 #!/bin/bash
 
 # ==========================================
-# 既存プロジェクトへのアプリ追加スクリプト
+# 既存プロジェクトへのアプリ追加スクリプト (階層修正版)
 # ==========================================
+
+set -e
 
 # 設定値
 ORG_NAME="Advanced-Develop-2nd"
@@ -24,28 +26,21 @@ if ! gh auth status >/dev/null 2>&1; then
     exit 1
 fi
 
-# Secret用のPAT入力
-# ========================================================
-# PAT取得ロジック (秘密ファイル -> 手動入力)
-# ========================================================
+gh auth setup-git
 
-# スクリプト自身のディレクトリを取得 (Windows/WSL両対応)
+# ========================================================
+# PAT取得ロジック
+# ========================================================
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 PAT_FILE="$SCRIPT_DIR/.secret_pat"
 
-# 1. 秘密ファイル (.secret_pat) をチェック
 if [ -f "$PAT_FILE" ]; then
-    # ファイルの中身を読み込み (trでWindows特有の改行コード \r を削除)
     ADMIN_TOKEN=$(cat "$PAT_FILE" | tr -d '\r\n')
-    
     if [ -n "$ADMIN_TOKEN" ]; then
         echo "✅ 秘密ファイル(.secret_pat)からPATを自動取得しました。"
-    else
-        echo "⚠️ .secret_pat ファイルが空です。"
     fi
 fi
 
-# 2. 取得できていなければ手動入力を要求
 if [ -z "$ADMIN_TOKEN" ]; then
     echo "--------------------------------------------------"
     echo "管理者用PAT(Personal Access Token)を入力してください。"
@@ -54,11 +49,17 @@ if [ -z "$ADMIN_TOKEN" ]; then
     echo ""
 fi
 
-# 入力値チェック
 if [ -z "$ADMIN_TOKEN" ]; then
-    echo "エラー: PATが取得できませんでした。処理を中止します。"
+    echo "エラー: PATが取得できませんでした。"
     exit 1
 fi
+
+# ========================================================
+# ★ここが修正ポイント: 作業ディレクトリの移動
+# ========================================================
+WORK_DIR="$SCRIPT_DIR/../.."
+cd "$WORK_DIR" || exit
+echo "作業場所を移動しました: $(pwd)"
 
 echo "🚀 アプリケーション追加プロセスを開始します..."
 
@@ -66,10 +67,9 @@ echo "🚀 アプリケーション追加プロセスを開始します..."
 echo "Creating App Repository: $APP_NAME..."
 gh repo create "$ORG_NAME/$APP_NAME" --template "$ORG_NAME/$TEMPLATE_APP" --private
 
-# 2. アプリ側にSecretと変数を設定 (これで自動連携が可能になる)
+# 2. アプリ側にSecretと変数を設定
 echo "Setting Secrets & Variables..."
 gh secret set ORG_ADMIN_TOKEN -b "$ADMIN_TOKEN" --repo "$ORG_NAME/$APP_NAME"
-# 親リポジトリ名を子に教える
 gh variable set PORTAL_REPO_NAME --body "$PORTAL_NAME" --repo "$ORG_NAME/$APP_NAME"
 
 # 3. 親リポジトリにSubtreeとして登録
@@ -78,24 +78,25 @@ echo "Configuring Subtree in Portal..."
 # ポータルをクローン（既にある場合はPull）
 if [ -d "$PORTAL_NAME" ]; then
     cd "$PORTAL_NAME" || exit
+    # 念のためPull
     git pull origin main
 else
     gh repo clone "$ORG_NAME/$PORTAL_NAME"
     cd "$PORTAL_NAME" || exit
 fi
 
-# アプリリポジトリをリモートとして追加
+# リモート追加 & Fetch
 git remote add "$APP_NAME" "https://github.com/$ORG_NAME/$APP_NAME.git"
+echo "Fetching app repository..."
+git fetch "$APP_NAME" main
 
-# Subtreeとして追加 (apps/アプリ名 に配置)
+# Subtreeとして追加
 git subtree add --prefix="apps/$APP_NAME" "$APP_NAME" main --squash -m "init: add new app $APP_NAME"
 
 # 親へPush
 git push origin main
 
-# 作業用ディレクトリから抜ける
 cd ..
-# rm -rf "$PORTAL_NAME" # 必要に応じてクローンしたポータルを削除
 
 echo "=========================================="
 echo "✅ アプリ追加完了！"
