@@ -43,6 +43,7 @@ chmod +x tools/setup_project.sh
 ```
 
 *※ 実行中に管理者用PAT（Personal Access Token）の入力を求められます。*
+*※ 作成したPATは安全に保管してください。子リポジトリの追加などで再度求められます*
 
 #### 3. 子リポジトリの追加
 
