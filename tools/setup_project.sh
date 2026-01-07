@@ -1,9 +1,11 @@
 #!/bin/bash
 
 # ==========================================
-# プロジェクト立ち上げ自動化スクリプト
-# Organization: Advanced-Develop-2nd
+# プロジェクト立ち上げ自動化スクリプト (修正版)
 # ==========================================
+
+# エラーが発生したら即停止する設定を追加
+set -e
 
 # 設定値
 ORG_NAME="Advanced-Develop-2nd"
@@ -20,61 +22,61 @@ fi
 PORTAL_NAME=$1
 APP_NAME=$2
 
-# GitHub CLIのログイン確認
+# GitHub CLI ログイン確認
 if ! gh auth status >/dev/null 2>&1; then
     echo "エラー: GitHub CLI (gh) にログインしていません。"
-    echo "'gh auth login' を実行してから再試行してください。"
     exit 1
 fi
 
-# Secret用のPAT入力
+# git credentialの設定 (重要: Privateリポジトリ操作のため)
+gh auth setup-git
+
 echo "--------------------------------------------------"
-echo "各リポジトリに登録する管理者用PAT(Personal Access Token)を入力してください。"
-echo "※入力内容は画面に表示されません"
+echo "管理者用PATを入力してください (Secret登録用)"
 echo "--------------------------------------------------"
 read -sp "PAT: " ADMIN_TOKEN
 echo ""
 
 if [ -z "$ADMIN_TOKEN" ]; then
-    echo "エラー: PATが入力されませんでした。中止します。"
+    echo "エラー: PATが入力されませんでした。"
     exit 1
 fi
 
 echo "🚀 プロジェクト立ち上げを開始します..."
 
-# 1. リポジトリの作成
-echo "Creating Portal Repository: $PORTAL_NAME..."
+# 1. リポジトリ作成
+echo "Creating Portal Repository..."
 gh repo create "$ORG_NAME/$PORTAL_NAME" --template "$ORG_NAME/$TEMPLATE_PORTAL" --private --clone
 
-echo "Creating App Repository: $APP_NAME..."
+echo "Creating App Repository..."
 gh repo create "$ORG_NAME/$APP_NAME" --template "$ORG_NAME/$TEMPLATE_APP" --private
 
-# 2. Secret (ORG_ADMIN_TOKEN) の登録
-echo "Setting Secrets..."
+# 2. Secret & Variable 設定
+echo "Setting Secrets & Variables..."
 gh secret set ORG_ADMIN_TOKEN -b "$ADMIN_TOKEN" --repo "$ORG_NAME/$PORTAL_NAME"
 gh secret set ORG_ADMIN_TOKEN -b "$ADMIN_TOKEN" --repo "$ORG_NAME/$APP_NAME"
-
-# 3. ★Variable (PORTAL_REPO_NAME) の登録 [今回追加箇所]
-# 子リポジトリが通知先を知るために、ポータル名を環境変数として登録します
-echo "Setting Repository Variables..."
 gh variable set PORTAL_REPO_NAME --body "$PORTAL_NAME" --repo "$ORG_NAME/$APP_NAME"
 
-# 4. Subtree連携 (ローカル操作)
+# 3. Subtree連携
 echo "Configuring Subtree..."
-cd "$PORTAL_NAME" || exit
+cd "$PORTAL_NAME"
 
-# アプリリポジトリをリモートとして追加
+# リモート追加
 git remote add "$APP_NAME" "https://github.com/$ORG_NAME/$APP_NAME.git"
 
-# Subtreeとして追加
-# 初回連携用の空コミットを作成
+# ★修正点: まずFetchして接続確認を行う
+echo "Fetching app repository..."
+git fetch "$APP_NAME" main
+
+# Subtree追加
+echo "Adding subtree..."
 git subtree add --prefix="apps/$APP_NAME" "$APP_NAME" main --squash -m "init: link $APP_NAME"
 
-# 変更を親リポジトリへPush
+# Push
 git push origin main
 
 cd ..
-rm -rf "$PORTAL_NAME" # 作業用ディレクトリ削除
+# rm -rf "$PORTAL_NAME" # 確認のため残すことを推奨
 
 echo "=========================================="
 echo "✅ セットアップ完了！"
