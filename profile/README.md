@@ -64,6 +64,22 @@ chmod +x tools/setup_project.sh
 
 ---
 
+### 🏷 ブランチ命名規則
+
+自動化ツールがバージョンアップの種類を判別できるよう、以下のPrefixを厳守してください。  
+マージ完了後のブランチは、GitHubの設定により、**即時削除**されます。
+
+| Prefix | 用途 | SemVer影響 | 例 |
+| :--- | :--- | :--- | :--- |
+| `feature/` | 新機能追加 | Minor | `feature/add-login-function` |
+| `bugfix/` | バグ修正 | Patch | `bugfix/fix-crash-on-startup` |
+| `hotfix/` | 緊急修正 | Patch | `hotfix/fix-security-vulnerability` |
+| `release/` | リリース準備 | Patch/Minor | `release/v1.2.0-prep` |
+| `docs/` | ドキュメント更新のみ | Patch | `docs/update-api-docs` |
+| `chore/` | その他メンテナンス | Patch | `chore/update-dependencies` |
+
+---
+
 ### 🆘 緊急連絡先
 
 - システム管理者： [藤平](https://github.com/fujihira-azapaeng)
