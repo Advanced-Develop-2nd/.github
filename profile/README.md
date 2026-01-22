@@ -9,17 +9,11 @@ Git Subtree と GitHub Actions を活用した自動連携フローにより、�
 ### 📚 運用ガイドライン & リソース
 開発ルールや運用フローは、リポジトリ内の以下のドキュメントを参照してください。
 
-#### 📄 ガイドライン・手順書
-- **[運用ガイドライン](./guidelines)**
-    - システム構成、ブランチ戦略、レビュー基準、自動化フローの詳細。
-- **[プロジェクト運用手順書_日常運用](./guidelines)**
-    - 開発者の日々のタスク着手からPR作成までのチートシート。
+#### 📖 運用ガイドライン (Portal Site)
 
-#### 🛠 テンプレートリポジトリ
-- **[temp_portal](https://github.com/Advanced-Develop-2nd/temp_portal)**
-    - 親リポジトリ用：プロジェクト管理・ドキュメント統合・デプロイ。
-- **[temp_app](https://github.com/Advanced-Develop-2nd/temp_app)**
-    - 子リポジトリ用：アプリケーションソースコード・詳細仕様書。
+プロジェクトの運用ルール、アーキテクチャ、開発フローは以下のGitHub Pagesで公開しています。  
+👉 **[エンジニアリング・ガイドライン (GitHub Pages)](https://Advanced-Develop-2nd.github.io/.github/)**
+(※ URLはSettings > Pagesの設定後に確定します)
 
 ---
 
