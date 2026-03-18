@@ -1,1 +1,4 @@
 tools/.secret_pat
+.env
+docs/memo.md
+.venv/

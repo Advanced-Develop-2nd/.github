@@ -1,5 +1,47 @@
 # 運用ガイドライン Home
 
+---
+
+{::options toc_levels="2..3" /}
+[:toc:]
+
+!!! info "本ガイドの目的"
+	本ガイドは、AZAPAエンジニアリング 先進開発部門 第２セクションのGitHub運用・開発・ドキュメント管理の標準を示します。
+
+## 全体像
+
+```mermaid
+flowchart TD
+    Potal[Project Portal]
+    App1[Appリポジトリ1]
+    App2[Appリポジトリ2]
+
+    subgraph "Portal+App連携型運用"
+        App1 -->|subtree連携| Potal
+        App2 -->|subtree連携| Potal
+    end
+
+    subgraph "App単体運用"
+        Standalone[App単体リポジトリ]
+    end
+```
+
+!!! tip "運用パターン"
+	- Portal+App連携型運用
+	- App単体運用
+
+## 目次
+
+- [管理者ガイド](admin.md)
+- [開発者ガイド](developer.md)
+- [ツール仕様](tools.md)
+- [アプリ単体運用ガイド](app_standalone.md)
+
+---
+
+各章の詳細は上記リンク先を参照してください。
+# 運用ガイドライン Home
+
 ## 🎯 目的
 
 本組織では、「**Docs as Code (ドキュメントもコードである)**」を掲げ、  
