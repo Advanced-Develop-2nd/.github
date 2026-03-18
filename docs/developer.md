@@ -7,7 +7,6 @@
 !!! note "Prefix運用"
 	- feature/、bugfix/、hotfix/、release/、docs/、chore/ など
 	- hotfix/はmain直マージ、必要に応じdevelopへcherry-pick
-	- 詳細は[memo.md](memo.md)の表を参照
 
 ## 2. コミットメッセージ規約
 
