@@ -7,13 +7,13 @@
 set -e
 
 # 設定値
-ORG_NAME="tinayrum"
+ORG_NAME="Advanced-Develop-2nd"
 TEMPLATE_APP="template_app"
 
 # 引数チェック
 if [ $# -ne 1 ]; then
-    echo "使用法: ./setup_app_only.sh <新規アプリ名>"
-    echo "例: ./setup_app_only.sh ProjectA_app"
+    echo "使用法: ./setup_app.sh <新規アプリ名>"
+    echo "例: ./setup_app.sh ProjectA_app"
     exit 1
 fi
 
