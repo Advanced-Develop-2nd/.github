@@ -1,5 +1,7 @@
 # Advanced-Develop-2nd Engineering
 
+[運用ガイドラインページ](https://advanced-develop-2nd.github.io/.github/)
+
 ---
 
 ## 🚀 ナレッジ共有型プロジェクト運用ポータル
