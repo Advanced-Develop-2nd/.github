@@ -20,7 +20,7 @@
 !!! example "運用ポイント"
 	- `.github/ISSUE_TEMPLATE/` のテンプレートを活用
 	- `.github/pull_request_template.md` でレビューチェックリストを活用
-	- Issueは必ずGitHub上で作成
+	- Issueは必ずGitHub上の該当リポジトリで作成
 	- PRはmain直Push禁止、必ずレビューを経由
 
 ## 4. コードレビュー
