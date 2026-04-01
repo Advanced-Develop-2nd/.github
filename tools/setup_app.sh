@@ -8,7 +8,7 @@ set -e
 
 # 設定値
 ORG_NAME="Advanced-Develop-2nd"
-TEMPLATE_APP="template_app"
+TEMPLATE_APP="temp_app"
 
 # 引数チェック
 if [ $# -ne 1 ]; then

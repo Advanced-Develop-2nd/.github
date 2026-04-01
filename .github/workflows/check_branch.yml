@@ -8,6 +8,10 @@ jobs:
       - name: Fail if branch name is invalid
         run: |
           BRANCH_NAME="${{ github.head_ref }}"
+          if [[ "$BRANCH_NAME" == "develop" ]]; then
+            echo "✅ Branch 'develop' is exempt from naming check. Skipping."
+            exit 0
+          fi
           if [[ ! "$BRANCH_NAME" =~ ^(main|develop|feature|bugfix|docs|hotfix|chore|release)/ ]]; then
             echo "❌ Error: Branch '$BRANCH_NAME' is invalid."
             echo "Allowed prefixes: main, develop, feature/, bugfix/, docs/, hotfix/, chore/, release/"
