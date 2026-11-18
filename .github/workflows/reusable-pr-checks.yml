@@ -164,6 +164,8 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          # 後続の git は手元の履歴を見るだけ。トークンを git の設定に残さず、docs ビルドの依存（pip・MkDocs プラグイン）から読めないようにする
+          persist-credentials: false
 
       - name: "Commit message (type(scope): subject)"
         if: ${{ !cancelled() && env.LINT == 'true' && steps.checkout.outcome == 'success' }}
