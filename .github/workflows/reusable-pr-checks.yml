@@ -198,7 +198,8 @@ jobs:
           SRC_PATH: ${{ inputs.src-path }}
           DOCS_PATH: ${{ inputs.docs-path }}
         run: |
-          changed=$(git diff --name-only "$BASE_SHA...$HEAD_SHA")
+          # core.quotepath=false: 日本語など ASCII 以外の名前のパスを引用符と 8 進表記にせず、そのまま出す（前方一致で判定するため）
+          changed=$(git -c core.quotepath=false diff --name-only "$BASE_SHA...$HEAD_SHA")
           echo "$changed"
           # 前方一致で判定する（パスに正規表現の記号が含まれていても誤判定しない）
           has_prefix() { awk -v p="$1" 'index($0, p) == 1 { found = 1 } END { exit !found }' <<< "$changed"; }
