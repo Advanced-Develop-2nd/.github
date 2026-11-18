@@ -1,0 +1,242 @@
+# PR の検査（再利用ワークフロー）
+#
+# ブランチ名とマージ先・PR タイトル・コミットメッセージ・Docs as Code・自動ラベル・docs ビルドを 1 ジョブで行う。
+# Actions はジョブごとに 1 分単位で切り上げて課金されるため、短い検査を 1 ジョブにまとめている（docs/ci-cost-reduction.md）。
+#
+# 呼び出し例（各リポジトリの .github/workflows/pr-checks.yml）:
+#
+#   on:
+#     pull_request:
+#       types: [opened, synchronize, reopened, edited]   # edited: タイトルやマージ先を変えたときに再検査する
+#   permissions:
+#     contents: read
+#     pull-requests: write   # 自動ラベル
+#   concurrency:
+#     # 本文だけの編集では run_id で別グループにし、実行中の検査を取り消さない
+#     group: pr-checks-${{ github.event.pull_request.number }}-${{ (github.event.action == 'edited' && !github.event.changes.base && !github.event.changes.title) && github.run_id || 'main' }}
+#     cancel-in-progress: true
+#   jobs:
+#     checks:
+#       uses: Advanced-Develop-2nd/.github/.github/workflows/reusable-pr-checks.yml@main
+#       with:
+#         strategy: main-develop
+#
+# strategy:
+#   main-develop（既定）: main = リリース / develop = ステージング。アプリリポジトリ向け
+#   main-only           : main だけで運用する。.github など。prefix のみ検査する
+#
+# develop → main（リリース）の PR では commit-lint と pr-title-lint を行わない。
+# develop で検査済みのコミットを再検査しないため。squash のコミット名は PR タイトルになるので、通常の PR は pr-title-lint で担保する。
+#
+# 各検査は前の検査が失敗しても実行し、失敗をまとめて表示する。
+name: Reusable PR checks
+
+on:
+  workflow_call:
+    inputs:
+      strategy:
+        description: "ブランチ戦略（main-develop / main-only）"
+        type: string
+        default: "main-develop"
+      commit-lint:
+        description: "コミットメッセージと PR タイトルを type(scope): subject で検査する"
+        type: boolean
+        default: true
+      docs-as-code:
+        description: "src-path が変わったのに docs-path が変わっていない PR を失敗にする"
+        type: boolean
+        default: true
+      src-path:
+        description: "Docs as Code 検査でソースとみなすパス（前方一致）"
+        type: string
+        default: "src/"
+      docs-path:
+        description: "Docs as Code 検査でドキュメントとみなすパス（前方一致）"
+        type: string
+        default: "docs/"
+      labeler:
+        description: "actions/labeler で .github/labeler.yml に従ってラベルを付ける"
+        type: boolean
+        default: true
+      docs-build:
+        description: "mkdocs build --strict を実行する"
+        type: boolean
+        default: true
+      python-version:
+        description: "docs ビルドに使う Python のバージョン"
+        type: string
+        default: "3.12"
+      requirements:
+        description: "docs ビルド用の requirements ファイル"
+        type: string
+        default: "requirements.txt"
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    name: PR checks
+    # 本文だけの編集では起動しない（skipped のジョブは課金されない）
+    if: >-
+      github.event_name == 'pull_request'
+      && (github.event.action != 'edited'
+        || github.event.changes.base != null
+        || github.event.changes.title != null)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write  # 自動ラベル
+    env:
+      LINT: ${{ inputs.commit-lint && github.head_ref != 'develop' }}
+    steps:
+      - name: Branch name and merge target
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+          BASE_REF: ${{ github.base_ref }}
+          STRATEGY: ${{ inputs.strategy }}
+        run: |
+          echo "PR: '$HEAD_REF' -> '$BASE_REF'（strategy: $STRATEGY）"
+          prefixes='^(feature|bugfix|docs|hotfix|chore|release)/'
+
+          case "$STRATEGY" in
+            main-only)
+              if [[ ! "$HEAD_REF" =~ $prefixes ]]; then
+                echo "::error::Branch '$HEAD_REF' is invalid. Allowed prefixes: feature/, bugfix/, docs/, hotfix/, chore/, release/"
+                exit 1
+              fi
+              echo "✅ '$HEAD_REF' is allowed."
+              exit 0
+              ;;
+            main-develop) ;;
+            *)
+              echo "::error::Unknown strategy '$STRATEGY'（main-develop / main-only）"
+              exit 1
+              ;;
+          esac
+
+          # 1) ブランチ名の prefix
+          if [[ "$HEAD_REF" != "develop" && ! "$HEAD_REF" =~ $prefixes ]]; then
+            echo "::error::Branch '$HEAD_REF' is invalid. Allowed prefixes: feature/, bugfix/, docs/, hotfix/, chore/, release/ (or 'develop')"
+            exit 1
+          fi
+
+          # 2) マージ先との組み合わせ（main = リリース / develop = ステージング）
+          case "$BASE_REF" in
+            main)
+              if [[ "$HEAD_REF" == "develop" || "$HEAD_REF" =~ ^(release|hotfix)/ ]]; then
+                echo "✅ '$HEAD_REF' -> main is allowed."
+              else
+                echo "::error::Only develop, release/* and hotfix/* can target main. Open this PR against 'develop' instead."
+                exit 1
+              fi
+              ;;
+            develop)
+              if [[ "$HEAD_REF" =~ ^(feature|bugfix|docs|chore|release|hotfix)/ ]]; then
+                echo "✅ '$HEAD_REF' -> develop is allowed."
+              else
+                echo "::error::'$HEAD_REF' cannot target develop."
+                exit 1
+              fi
+              ;;
+            *)
+              echo "ℹ️ Base '$BASE_REF' is not main/develop. Only the prefix was checked."
+              ;;
+          esac
+
+      - name: "PR title (type(scope): subject)"
+        if: ${{ !cancelled() && env.LINT == 'true' }}
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          pattern='^(feat|fix|docs|chore|refactor|test|ci)(\([^)]+\))?!?: ?.+'
+          if [[ "$PR_TITLE" =~ $pattern ]]; then
+            echo "✅ $PR_TITLE"
+          else
+            echo "::error::PR タイトルが規約に合っていません: $PR_TITLE"
+            echo "squash マージ時のコミット名になるため、type(scope): subject で付けてください。"
+            exit 1
+          fi
+
+      - name: Checkout
+        id: checkout
+        if: ${{ !cancelled() && (env.LINT == 'true' || inputs.docs-as-code || inputs.docs-build) }}
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          # 後続の git は手元の履歴を見るだけ。トークンを git の設定に残さず、docs ビルドの依存（pip・MkDocs プラグイン）から読めないようにする
+          persist-credentials: false
+
+      - name: "Commit message (type(scope): subject)"
+        if: ${{ !cancelled() && env.LINT == 'true' && steps.checkout.outcome == 'success' }}
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          pattern='^(feat|fix|docs|chore|refactor|test|ci)(\([^)]+\))?!?: ?.+'
+          fail=0
+          while IFS= read -r subject; do
+            [[ -z "$subject" ]] && continue
+            [[ "$subject" =~ ^Merge\  ]] && continue
+            if [[ "$subject" =~ $pattern ]]; then
+              echo "✅ $subject"
+            else
+              echo "::error::Invalid commit message: $subject"
+              fail=1
+            fi
+          done < <(git log --no-merges --format=%s "$BASE_SHA..$HEAD_SHA")
+          if [[ $fail -ne 0 ]]; then
+            echo "形式: type(scope): subject / type: feat, fix, docs, chore, refactor, test, ci"
+          fi
+          exit $fail
+
+      - name: Docs as Code (src/ changes need docs/)
+        if: ${{ !cancelled() && inputs.docs-as-code && steps.checkout.outcome == 'success' }}
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          GH_TOKEN: ${{ github.token }}
+          SRC_PATH: ${{ inputs.src-path }}
+          DOCS_PATH: ${{ inputs.docs-path }}
+        run: |
+          # core.quotepath=false: 日本語など ASCII 以外の名前のパスを引用符と 8 進表記にせず、そのまま出す（前方一致で判定するため）
+          changed=$(git -c core.quotepath=false diff --name-only "$BASE_SHA...$HEAD_SHA")
+          echo "$changed"
+          # 前方一致で判定する（パスに正規表現の記号が含まれていても誤判定しない）
+          has_prefix() { awk -v p="$1" 'index($0, p) == 1 { found = 1 } END { exit !found }' <<< "$changed"; }
+          if has_prefix "$SRC_PATH" && ! has_prefix "$DOCS_PATH"; then
+            # 再実行では起動時のイベントのラベルが使われるため、今のラベルを API で取る
+            skip_docs=$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/labels" --jq 'any(.[]; .name == "skip-docs")')
+            if [[ "$skip_docs" == "true" ]]; then
+              echo "⚠️ $SRC_PATH changed without $DOCS_PATH, but 'skip-docs' label is set."
+              exit 0
+            fi
+            echo "::error::$SRC_PATH が変更されていますが $DOCS_PATH が更新されていません（Docs as Code）。"
+            echo "更新不要な場合は 'skip-docs' ラベルを付けて再実行し、理由を PR 本文に書いてください。"
+            exit 1
+          fi
+          echo "✅ OK"
+
+      - name: Auto label
+        if: ${{ !cancelled() && inputs.labeler }}
+        uses: actions/labeler@v5
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          sync-labels: true
+
+      - name: Set up Python (docs build)
+        if: ${{ !cancelled() && inputs.docs-build && steps.checkout.outcome == 'success' }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ inputs.python-version }}
+          cache: pip
+          cache-dependency-path: ${{ inputs.requirements }}
+
+      - name: Docs build (mkdocs --strict)
+        if: ${{ !cancelled() && inputs.docs-build && steps.checkout.outcome == 'success' }}
+        env:
+          REQUIREMENTS: ${{ inputs.requirements }}
+        run: |
+          pip install -r "$REQUIREMENTS"
+          mkdocs build --strict
