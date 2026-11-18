@@ -74,3 +74,4 @@ nav:
   - 開発者ガイド: developer.md
   - ツール仕様: tools.md
   - アプリ単体運用ガイド: app_standalone.md
+  - CI 実行分数の削減: ci-cost-reduction.md

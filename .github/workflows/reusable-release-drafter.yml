@@ -1,0 +1,52 @@
+# Release Drafter（再利用ワークフロー）
+#
+# GITHUB_TOKEN で動かす。追加の Secret は不要。
+# 呼び出し側でも permissions を付与すること（再利用側は呼び出し側の権限を超えられない）。
+#
+# 呼び出し例（各リポジトリの .github/workflows/release-drafter.yml）:
+#
+#   on:
+#     push:
+#       branches: [main]
+#   permissions:
+#     contents: write
+#     pull-requests: read
+#   jobs:
+#     release:
+#       uses: Advanced-Develop-2nd/.github/.github/workflows/reusable-release-drafter.yml@main
+#       with:
+#         publish: true
+#
+# 設定ファイル（config-name）は呼び出し側リポジトリの .github/ から読む。
+# 無い場合は Advanced-Develop-2nd/.github の .github/release-drafter.yml が使われる。
+name: Reusable Release Drafter
+
+on:
+  workflow_call:
+    inputs:
+      publish:
+        description: "true でリリースを公開する。false なら下書きのまま"
+        type: boolean
+        default: false
+      config-name:
+        description: "設定ファイル名（.github/ からの相対パス）"
+        type: string
+        default: "release-drafter.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  update_release_draft:
+    name: Update release draft
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # リリース・タグの作成
+      pull-requests: read
+    steps:
+      - uses: release-drafter/release-drafter@v6
+        with:
+          publish: ${{ inputs.publish }}
+          config-name: ${{ inputs.config-name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
