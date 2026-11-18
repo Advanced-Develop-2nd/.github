@@ -76,8 +76,9 @@ permissions:
 
 jobs:
   checks:
-    name: PR checks
-    # 本文だけの編集では起動しない（skipped のジョブは課金されない）
+    # 本文だけの編集では起動しない（skipped のジョブは課金されない）。
+    # そのとき skipped の結果が「PR checks」の直前の結果（失敗を含む）を上書きしないよう、ジョブ名を変える
+    name: ${{ (github.event.action == 'edited' && github.event.changes.base == null && github.event.changes.title == null) && 'PR checks (skipped for body edit)' || 'PR checks' }}
     if: >-
       github.event_name == 'pull_request'
       && (github.event.action != 'edited'
