@@ -193,7 +193,8 @@ jobs:
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-          SKIP_DOCS: ${{ contains(github.event.pull_request.labels.*.name, 'skip-docs') }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          GH_TOKEN: ${{ github.token }}
           SRC_PATH: ${{ inputs.src-path }}
           DOCS_PATH: ${{ inputs.docs-path }}
         run: |
@@ -202,12 +203,14 @@ jobs:
           # 前方一致で判定する（パスに正規表現の記号が含まれていても誤判定しない）
           has_prefix() { awk -v p="$1" 'index($0, p) == 1 { found = 1 } END { exit !found }' <<< "$changed"; }
           if has_prefix "$SRC_PATH" && ! has_prefix "$DOCS_PATH"; then
-            if [[ "$SKIP_DOCS" == "true" ]]; then
+            # 再実行では起動時のイベントのラベルが使われるため、今のラベルを API で取る
+            skip_docs=$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/labels" --jq 'any(.[]; .name == "skip-docs")')
+            if [[ "$skip_docs" == "true" ]]; then
               echo "⚠️ $SRC_PATH changed without $DOCS_PATH, but 'skip-docs' label is set."
               exit 0
             fi
             echo "::error::$SRC_PATH が変更されていますが $DOCS_PATH が更新されていません（Docs as Code）。"
-            echo "更新不要な場合は 'skip-docs' ラベルを付け、理由を PR 本文に書いてください。"
+            echo "更新不要な場合は 'skip-docs' ラベルを付けて再実行し、理由を PR 本文に書いてください。"
             exit 1
           fi
           echo "✅ OK"
