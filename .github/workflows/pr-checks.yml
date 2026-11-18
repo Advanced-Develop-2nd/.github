@@ -1,0 +1,23 @@
+name: PR checks
+
+# 中身は reusable-pr-checks.yml にある。このリポジトリは main だけで運用するため strategy は main-only。
+on:
+  pull_request:
+    # edited: タイトルやマージ先を変えたときに再検査する（本文だけの編集では検査ジョブは起動しない）
+    types: [opened, synchronize, reopened, edited]
+
+permissions:
+  contents: read
+  pull-requests: write # 自動ラベル
+
+concurrency:
+  # 本文だけの編集では run_id で別グループにし、実行中の検査を取り消さない
+  group: pr-checks-${{ github.event.pull_request.number }}-${{ (github.event.action == 'edited' && !github.event.changes.base && !github.event.changes.title) && github.run_id || 'main' }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    uses: ./.github/workflows/reusable-pr-checks.yml
+    with:
+      strategy: main-only
+      docs-as-code: false
