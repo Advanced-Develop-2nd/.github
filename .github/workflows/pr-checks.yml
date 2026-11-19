@@ -21,5 +21,3 @@ jobs:
     with:
       strategy: main-only
       docs-as-code: false
-      # 既存ページにリンク切れ（app_standalone.md → memo.md）があり --strict で失敗するため、従来どおり docs ビルドは行わない
-      docs-build: false
