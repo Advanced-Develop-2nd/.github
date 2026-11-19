@@ -122,6 +122,9 @@ if: >-
   || github.event.changes.title != null
 ```
 
+本文だけの編集のときも、ジョブは skipped として 1 件記録される。同じ名前だと、直前の「PR checks」の結果（失敗を含む）を上書きしてしまう。
+そのため、本文だけの編集のときはジョブ名を「PR checks (skipped for body edit)」に切り替える。なお、skipped のジョブは名前の式を展開せずに表示されるので、PR の Checks には式の文字列が名前になった行が出る。
+
 develop → main の PR では、PR タイトル検査とコミット検査をステップの `if` で飛ばす（従来と同じ）。
 
 ### 各リポジトリの変更
