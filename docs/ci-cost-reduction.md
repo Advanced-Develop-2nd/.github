@@ -14,7 +14,7 @@ Organization 内のプライベートリポジトリで GitHub Actions の無料
     - develop へのマージ（push）でも、PR で通ったものと同じ CI がもう一度走る。
     - Windows と Python 3.10 のビルドが PR の push ごとに走る（Windows は課金 2 倍）。
     - 連続して push しても古い実行が止まらない。
-- 共通ワークフローを Organization 外（tinayrum/.github）から参照している。本業の Organization なので、Organization の中で完結させる。
+- 共通ワークフローを Organization 外のリポジトリから参照している。本業の Organization なので、Organization の中で完結させる。
 
 ## オントロジー図
 
@@ -89,7 +89,7 @@ classDiagram
 
 | ID | 手順 | 合格条件 |
 | :--- | :--- | :--- |
-| T1 | 8 リポジトリの `.github/workflows/` を `tinayrum/` で検索する | 0 件 |
+| T1 | 8 リポジトリの `.github/workflows/` で、Organization 外のリポジトリを参照する `uses:` を検索する | 0 件 |
 | T2 | `feature/*` → develop の PR を作る（src と docs を両方変更） | 「PR checks」1 ジョブとリポジトリ固有のビルドだけが走り、成功する。C ビルド系は Linux / Python 3.12 の 1 本だけ |
 | T3 | 不正なブランチ名（prefix なし）で PR を作る | PR checks が失敗し、ログにブランチ名のエラーが出る |
 | T4 | 規約に合わない PR タイトルで PR を作り、次にタイトルを直す | 作成時は PR checks が失敗する。タイトルを直すと PR checks だけが再実行されて成功し、ビルドの run は起動しない |
@@ -171,4 +171,3 @@ C ビルド系では、ビルドの matrix を起動条件で切り替える。m
 | 11/19〜11/20 | C ビルド系で PR を作り、T1〜T12 を確認。G2 で develop にマージ | Claude → 本人 |
 | 11/20〜11/25 | 残り 7 リポジトリに同じ変更を入れて PR、G2 | Claude → 本人 |
 | 12/1〜12/7 | T14 の効果測定、報告 | Claude |
-| 後日（別 Issue） | 同じ削減策を tinayrum 側の共通ワークフローにも入れるか検討する | 要確認 |
