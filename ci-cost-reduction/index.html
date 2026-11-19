@@ -1,0 +1,1300 @@
+
+<!doctype html>
+<html lang="ja" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="AZAPAエンジニアリング 先進開発部門 第２セクション ドキュメントサイト">
+      
+      
+      
+      
+        <link rel="prev" href="../app_standalone/">
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
+    
+    
+      
+        <title>CI 実行分数の削減 - AZAPAエンジニアリング 先進開発部門 第２セクション Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.57a0d79d.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.fb2fffe2.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="light-blue">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#ci" class="md-skip">
+          コンテンツにスキップ
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="ヘッダー">
+    <a href=".." title="AZAPAエンジニアリング 先進開発部門 第２セクション Documentation" class="md-header__button md-logo" aria-label="AZAPAエンジニアリング 先進開発部門 第２セクション Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            AZAPAエンジニアリング 先進開発部門 第２セクション Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              CI 実行分数の削減
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="light-blue"  aria-label="ダークモードへ切り替え"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="ダークモードへ切り替え" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="light-blue"  aria-label="ライトモードへ切り替え"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="ライトモードへ切り替え" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="検索" placeholder="検索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="検索">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="共有" aria-label="共有" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="クリア" aria-label="クリア" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            検索を初期化
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Advanced-Develop-2nd/.github" title="リポジトリへ" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Advanced-Develop-2nd/.github
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="タブ" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../admin/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  管理者ガイド
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../developer/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  開発者ガイド
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../tools/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  ツール仕様
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../app_standalone/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  アプリ単体運用ガイド
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="./" class="md-tabs__link">
+        
+  
+  
+    
+  
+  CI 実行分数の削減
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="ナビゲーション" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="AZAPAエンジニアリング 先進開発部門 第２セクション Documentation" class="md-nav__button md-logo" aria-label="AZAPAエンジニアリング 先進開発部門 第２セクション Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    AZAPAエンジニアリング 先進開発部門 第２セクション Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Advanced-Develop-2nd/.github" title="リポジトリへ" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Advanced-Develop-2nd/.github
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../admin/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    管理者ガイド
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../developer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    開発者ガイド
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tools/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ツール仕様
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../app_standalone/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    アプリ単体運用ガイド
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CI 実行分数の削減
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CI 実行分数の削減
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="目次">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目次
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        背景
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        オントロジー図
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        要件定義
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        テストシナリオ
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        設計
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="設計">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        新しい共通ワークフロー（このリポジトリ）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        各リポジトリの変更
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#c-2026-11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        見積もり（C ビルド系、2026-11 の実績にあてはめた場合）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        適用の順序
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#todo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TODO・ロードマップ
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="目次">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目次
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        背景
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        オントロジー図
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        要件定義
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        テストシナリオ
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        設計
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="設計">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        新しい共通ワークフロー（このリポジトリ）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        各リポジトリの変更
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#c-2026-11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        見積もり（C ビルド系、2026-11 の実績にあてはめた場合）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        適用の順序
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#todo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TODO・ロードマップ
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="ci">CI 実行分数の削減（設計）<a class="headerlink" href="#ci" title="Permanent link">&para;</a></h1>
+<p>Organization 内のプライベートリポジトリで GitHub Actions の無料枠（Free プラン：月 2,000 分）を使い切ったため、CI の構成を見直す。
+このページは設計成果物（オントロジー図・要件定義・テストシナリオ・設計・ロードマップ）の正本。</p>
+<h2 id="_1">背景<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li>2026-11 は 11/18 時点で Linux 1,725 分 + Windows 168 分（課金は 2 倍）＝ 約 2,061 分換算となり、無料枠を超えた。</li>
+<li>課金はジョブごとに 1 分単位で切り上げられる。PR ごとに 1 分未満の短いジョブが 6〜9 本走るため、実行時間の合計より課金が大きく膨らむ。
+  例として、C ビルドと Windows ビルドを持つリポジトリでは、今月の実行時間 373 分に対して課金は 906 分（約 2.4 倍）だった。</li>
+<li>主な内訳<ul>
+<li>ブランチ名検査・自動ラベル・PR タイトル検査・コミット検査・Docs as Code 検査・docs ビルドが、それぞれ別のジョブ（各 1 分以上）になっている。</li>
+<li>CI のトリガーに <code>edited</code> があり、PR のタイトルや本文を直しただけで全ジョブが再実行される（PR の CI 実行の約 3 割）。</li>
+<li>develop へのマージ（push）でも、PR で通ったものと同じ CI がもう一度走る。</li>
+<li>Windows と Python 3.10 のビルドが PR の push ごとに走る（Windows は課金 2 倍）。</li>
+<li>連続して push しても古い実行が止まらない。</li>
+</ul>
+</li>
+<li>共通ワークフローを Organization 外のリポジトリから参照している。本業の Organization なので、Organization の中で完結させる。</li>
+</ul>
+<h2 id="_2">オントロジー図<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<pre class="mermaid"><code>classDiagram
+    direction LR
+    class Organization {
+        プラン（Free）
+        月の無料枠 2,000 分
+        予算（spending limit）
+    }
+    class Repository {
+        可視性（private / public）
+    }
+    class CallerWorkflow {
+        トリガー（event・types・paths）
+        concurrency
+    }
+    class ReusableWorkflow {
+        inputs
+    }
+    class Event {
+        pull_request（opened / synchronize / reopened / edited）
+        push（develop / main）
+    }
+    class Run
+    class Job {
+        if 条件
+        matrix
+        実行時間
+    }
+    class Runner {
+        OS（Linux ×1 / Windows ×2）
+    }
+    class BilledMinutes {
+        ジョブごとに 1 分単位で切り上げ × OS 倍率
+    }
+    Organization "1" o-- "*" Repository
+    Organization "1" o-- "1" ReusableWorkflow : .github リポジトリに置く
+    Repository "1" o-- "*" CallerWorkflow
+    CallerWorkflow ..&gt; ReusableWorkflow : uses
+    Event --&gt; CallerWorkflow : 起動する
+    CallerWorkflow "1" --&gt; "*" Run
+    Run "1" o-- "*" Job
+    Job --&gt; Runner : runs-on
+    Job --&gt; BilledMinutes : 課金される（skipped は 0）
+    BilledMinutes --&gt; Organization : 無料枠・予算から引かれる</code></pre>
+<p>ジョブの数と OS が課金を決める。そのため、削減の手段は「ジョブを起動しない」「ジョブをまとめる」「Windows の回数を減らす」の 3 つになる。</p>
+<h2 id="_3">要件定義<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">ID</th>
+<th style="text-align: left;">要件</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">R1</td>
+<td style="text-align: left;">対象 8 リポジトリのワークフローが Organization 外のリポジトリを参照しない。共通ワークフローは <code>Advanced-Develop-2nd/.github</code> に置く。</td>
+</tr>
+<tr>
+<td style="text-align: left;">R2</td>
+<td style="text-align: left;">PR の検査内容（ブランチ名とマージ先、PR タイトル、コミットメッセージ、Docs as Code、自動ラベル、docs ビルド）は今と同じ判定を保つ。これらを 1 ジョブにまとめる。</td>
+</tr>
+<tr>
+<td style="text-align: left;">R3</td>
+<td style="text-align: left;">PR の本文だけを編集したときは、ジョブを 1 本も実行しない。タイトルかマージ先を変えたときは、検査ジョブだけを再実行する。ビルドは再実行しない。</td>
+</tr>
+<tr>
+<td style="text-align: left;">R4</td>
+<td style="text-align: left;">同じ PR に新しい push が来たら、実行中の古い run を取り消す。本文の編集では取り消さない。</td>
+</tr>
+<tr>
+<td style="text-align: left;">R5</td>
+<td style="text-align: left;">Windows と Python 3.10 のビルドは、main 向けの PR と develop への push のときだけ実行する。</td>
+</tr>
+<tr>
+<td style="text-align: left;">R6</td>
+<td style="text-align: left;">docs と Markdown だけの変更では、ビルド系のジョブを起動しない（docs ビルドは検査ジョブの中で行う）。</td>
+</tr>
+<tr>
+<td style="text-align: left;">R7</td>
+<td style="text-align: left;">develop への push では検査ジョブと docs ビルドを実行しない。ビルドとテストだけを行う。</td>
+</tr>
+<tr>
+<td style="text-align: left;">R8</td>
+<td style="text-align: left;">main へのマージで release-drafter がリリースを作る動作を保つ。</td>
+</tr>
+<tr>
+<td style="text-align: left;">R9</td>
+<td style="text-align: left;">この <code>.github</code> リポジトリは公開されているので、エンドユーザー名や契約に関わる情報を書かない。</td>
+</tr>
+<tr>
+<td style="text-align: left;">R10</td>
+<td style="text-align: left;">効果の目標：PR への push 1 回あたりの課金分を 50% 以上減らす。</td>
+</tr>
+</tbody>
+</table>
+<p>ブランチ保護は Free プランのプライベートリポジトリでは使えない。そのため必須チェックの名前は登録されておらず、ジョブ名が変わってもマージは妨げられない。</p>
+<h2 id="_4">テストシナリオ<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<p>検証には C ビルドと Windows ビルドを持つリポジトリ（以下「C ビルド系」）を使う。T1 と T14 は全リポジトリが対象。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">ID</th>
+<th style="text-align: left;">手順</th>
+<th style="text-align: left;">合格条件</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">T1</td>
+<td style="text-align: left;">8 リポジトリの <code>.github/workflows/</code> で、Organization 外のリポジトリを参照する <code>uses:</code> を検索する</td>
+<td style="text-align: left;">0 件</td>
+</tr>
+<tr>
+<td style="text-align: left;">T2</td>
+<td style="text-align: left;"><code>feature/*</code> → develop の PR を作る（src と docs を両方変更）</td>
+<td style="text-align: left;">「PR checks」1 ジョブとリポジトリ固有のビルドだけが走り、成功する。C ビルド系は Linux / Python 3.12 の 1 本だけ</td>
+</tr>
+<tr>
+<td style="text-align: left;">T3</td>
+<td style="text-align: left;">不正なブランチ名（prefix なし）で PR を作る</td>
+<td style="text-align: left;">PR checks が失敗し、ログにブランチ名のエラーが出る</td>
+</tr>
+<tr>
+<td style="text-align: left;">T4</td>
+<td style="text-align: left;">規約に合わない PR タイトルで PR を作り、次にタイトルを直す</td>
+<td style="text-align: left;">作成時は PR checks が失敗する。タイトルを直すと PR checks だけが再実行されて成功し、ビルドの run は起動しない</td>
+</tr>
+<tr>
+<td style="text-align: left;">T5</td>
+<td style="text-align: left;">PR の本文だけを編集する</td>
+<td style="text-align: left;">課金されるジョブが 0 本（run ができても全ジョブ skipped）。実行中の run は取り消されない</td>
+</tr>
+<tr>
+<td style="text-align: left;">T6</td>
+<td style="text-align: left;">PR のマージ先を変える</td>
+<td style="text-align: left;">PR checks が再実行され、マージ先の判定が新しい base で行われる</td>
+</tr>
+<tr>
+<td style="text-align: left;">T7</td>
+<td style="text-align: left;">PR に続けて 2 回 push する</td>
+<td style="text-align: left;">1 回目の run が cancelled になる</td>
+</tr>
+<tr>
+<td style="text-align: left;">T8</td>
+<td style="text-align: left;">docs だけを変えた PR を作る</td>
+<td style="text-align: left;">ビルドの run が起動しない。PR checks は走り、docs ビルドが成功する</td>
+</tr>
+<tr>
+<td style="text-align: left;">T9</td>
+<td style="text-align: left;">develop → main の PR を作る（C ビルド系）</td>
+<td style="text-align: left;">ビルドが 3 本（Linux py3.12 / Linux py3.10 / Windows py3.12）走る。PR タイトル検査とコミット検査は実行されない</td>
+</tr>
+<tr>
+<td style="text-align: left;">T10</td>
+<td style="text-align: left;">develop にマージする（push）</td>
+<td style="text-align: left;">C ビルド系はビルド 3 本だけが走り、PR checks は走らない。ビルドを持たないリポジトリでは run が起動しない</td>
+</tr>
+<tr>
+<td style="text-align: left;">T11</td>
+<td style="text-align: left;">src だけを変えた PR を作り、<code>skip-docs</code> ラベルを付けて再実行する</td>
+<td style="text-align: left;">最初は Docs as Code で失敗し、ラベルを付けて再実行すると成功する</td>
+</tr>
+<tr>
+<td style="text-align: left;">T12</td>
+<td style="text-align: left;">PR を作る</td>
+<td style="text-align: left;">ブランチ名に応じたラベルが今までどおり付く</td>
+</tr>
+<tr>
+<td style="text-align: left;">T13</td>
+<td style="text-align: left;">main にマージする（リリース）</td>
+<td style="text-align: left;">release-drafter がリリースを作る（G3 のときに確認）</td>
+</tr>
+<tr>
+<td style="text-align: left;">T14</td>
+<td style="text-align: left;">2026-12 第 1 週の課金レポートを集計する</td>
+<td style="text-align: left;">PR への push 1 回あたりの課金分が 2026-11 と比べて 50% 以上減っている</td>
+</tr>
+</tbody>
+</table>
+<h2 id="_5">設計<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
+<h3 id="_6">新しい共通ワークフロー（このリポジトリ）<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">ファイル</th>
+<th style="text-align: left;">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>.github/workflows/reusable-pr-checks.yml</code></td>
+<td style="text-align: left;">PR の検査を 1 ジョブ「PR checks」にまとめる。ステップは、ブランチ名とマージ先 → PR タイトル → コミットメッセージ → Docs as Code → 自動ラベル → docs ビルド の順。前のステップが失敗しても後のステップを実行し（<code>!cancelled()</code>）、すべての失敗を 1 回の実行で見せる。入力は従来の <code>reusable-ci.yml</code> と <code>reusable-check-branch.yml</code> の入力を引き継ぐ。</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>.github/workflows/reusable-release-drafter.yml</code></td>
+<td style="text-align: left;">従来と同じ内容を Organization 内に置く。設定ファイルが呼び出し側にない場合は、このリポジトリの <code>.github/release-drafter.yml</code> が使われる。</td>
+</tr>
+</tbody>
+</table>
+<p>ジョブの起動条件（R3）は次のとおり。</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">if</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;-</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="no">github.event.action != 'edited'</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span><span class="no">|| github.event.changes.base != null</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">  </span><span class="no">|| github.event.changes.title != null</span>
+</span></code></pre></div>
+<p>本文だけの編集のときも、ジョブは skipped として 1 件記録される。同じ名前だと、直前の「PR checks」の結果（失敗を含む）を上書きしてしまう。
+そのため、本文だけの編集のときはジョブ名を「PR checks (skipped for body edit)」に切り替える。なお、skipped のジョブは名前の式を展開せずに表示されるので、PR の Checks には式の文字列が名前になった行が出る。</p>
+<p>develop → main の PR では、PR タイトル検査とコミット検査をステップの <code>if</code> で飛ばす（従来と同じ）。</p>
+<h3 id="_7">各リポジトリの変更<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">ファイル</th>
+<th style="text-align: left;">変更</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>.github/workflows/pr-checks.yml</code>（新規）</td>
+<td style="text-align: left;"><code>pull_request</code>（opened / synchronize / reopened / edited）で <code>reusable-pr-checks.yml@main</code> を呼ぶ。concurrency は PR 番号ごとに 1 グループとし、本文だけの編集は別グループにして既存の run を取り消さない（R4）。</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>check_branch.yml</code>、<code>pr-labeler.yml</code></td>
+<td style="text-align: left;">削除する（PR checks に統合）。</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>ci.yml</code></td>
+<td style="text-align: left;">共通ワークフローの呼び出しを外し、リポジトリ固有のビルドだけを残す。<code>edited</code> を外し、<code>paths-ignore</code>（<code>docs/**</code>、<code>**/*.md</code>、<code>mkdocs.yml</code>）と concurrency を足す。ビルドを持たないリポジトリでは <code>ci.yml</code> を削除する。</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>release-drafter.yml</code></td>
+<td style="text-align: left;">参照先をこのリポジトリの <code>reusable-release-drafter.yml@main</code> に変える。</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>docs/development.md</code> など</td>
+<td style="text-align: left;">ワークフロー名と検査の場所の記述を新しい構成に合わせる（Docs as Code）。</td>
+</tr>
+</tbody>
+</table>
+<p>リポジトリの種類ごとに、PR への push 1 回で走るジョブは次のように変わる。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">種類</th>
+<th style="text-align: left;">今</th>
+<th style="text-align: left;">変更後（develop 向け PR）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">検査だけ（3 件）</td>
+<td style="text-align: left;">6 本</td>
+<td style="text-align: left;">1 本</td>
+</tr>
+<tr>
+<td style="text-align: left;">フロントエンドあり（1 件）</td>
+<td style="text-align: left;">7 本</td>
+<td style="text-align: left;">2 本</td>
+</tr>
+<tr>
+<td style="text-align: left;">Simulink 系（3 件、MATLAB テストは self-hosted で課金なし）</td>
+<td style="text-align: left;">7 本</td>
+<td style="text-align: left;">2 本</td>
+</tr>
+<tr>
+<td style="text-align: left;">C ビルド系（1 件）</td>
+<td style="text-align: left;">9 本（うち Windows 1 本 = 2 倍）</td>
+<td style="text-align: left;">2 本</td>
+</tr>
+</tbody>
+</table>
+<p>C ビルド系では、ビルドの matrix を起動条件で切り替える。main 向けの PR と develop への push のときは 3 本、それ以外は Linux / Python 3.12 の 1 本にする（R5）。</p>
+<h3 id="c-2026-11">見積もり（C ビルド系、2026-11 の実績にあてはめた場合）<a class="headerlink" href="#c-2026-11" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">区分</th>
+<th style="text-align: right;">今の課金</th>
+<th style="text-align: right;">変更後の見込み</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">PR（44 回 + 編集による再実行 18 回）</td>
+<td style="text-align: right;">約 640 分</td>
+<td style="text-align: right;">約 100 分</td>
+</tr>
+<tr>
+<td style="text-align: left;">develop への push（41 回）</td>
+<td style="text-align: right;">約 250 分</td>
+<td style="text-align: right;">約 250 分</td>
+</tr>
+<tr>
+<td style="text-align: left;">合計</td>
+<td style="text-align: right;">約 906 分</td>
+<td style="text-align: right;">約 350 分（約 60% 減）</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_8">適用の順序<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h3>
+<p>呼び出し側は共通ワークフローを <code>@main</code> で参照する。そのため、このリポジトリの変更を先に main に入れてから、各リポジトリの PR をマージする。
+検証（T2〜T12）は Actions が動く状態で行う必要がある。今月の無料枠を使い切っているため、検証の前に予算（spending limit）の設定が必要。</p>
+<h2 id="todo">TODO・ロードマップ<a class="headerlink" href="#todo" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">時期</th>
+<th style="text-align: left;">作業</th>
+<th style="text-align: left;">担当</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">11/18</td>
+<td style="text-align: left;">設計（このページ）、G1 着手承認</td>
+<td style="text-align: left;">Claude → 本人</td>
+</tr>
+<tr>
+<td style="text-align: left;">11/18</td>
+<td style="text-align: left;">Actions の予算を設定する（金額は本人が決める）</td>
+<td style="text-align: left;">本人</td>
+</tr>
+<tr>
+<td style="text-align: left;">11/19</td>
+<td style="text-align: left;">このリポジトリに共通ワークフローを実装して PR、G2、main にマージ</td>
+<td style="text-align: left;">Claude → 本人</td>
+</tr>
+<tr>
+<td style="text-align: left;">11/19〜11/20</td>
+<td style="text-align: left;">C ビルド系で PR を作り、T1〜T12 を確認。G2 で develop にマージ</td>
+<td style="text-align: left;">Claude → 本人</td>
+</tr>
+<tr>
+<td style="text-align: left;">11/20〜11/25</td>
+<td style="text-align: left;">残り 7 リポジトリに同じ変更を入れて PR、G2</td>
+<td style="text-align: left;">Claude → 本人</td>
+</tr>
+<tr>
+<td style="text-align: left;">12/1〜12/7</td>
+<td style="text-align: left;">T14 の効果測定、報告</td>
+<td style="text-align: left;">Claude</td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  ページトップへ戻る
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "navigation.indexes", "navigation.tracking", "search.highlight", "search.share", "search.suggest", "content.code.copy", "content.code.annotate"], "search": "../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "\u30b3\u30d4\u30fc\u3057\u307e\u3057\u305f", "clipboard.copy": "\u30af\u30ea\u30c3\u30d7\u30dc\u30fc\u30c9\u3078\u30b3\u30d4\u30fc", "search.result.more.one": "\u3053\u306e\u30da\u30fc\u30b8\u5185\u306b\u3082\u30461\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.more.other": "\u3053\u306e\u30da\u30fc\u30b8\u5185\u306b\u3042\u3068#\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.none": "\u4f55\u3082\u898b\u3064\u304b\u308a\u307e\u305b\u3093\u3067\u3057\u305f", "search.result.one": "1\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.other": "#\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.placeholder": "\u691c\u7d22\u30ad\u30fc\u30ef\u30fc\u30c9\u3092\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044", "search.result.term.missing": "\u691c\u7d22\u306b\u542b\u307e\u308c\u306a\u3044", "select.version": "\u30d0\u30fc\u30b8\u30e7\u30f3\u5207\u308a\u66ff\u3048"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.a5f9d56c.min.js"></script>
+      
+        <script src="../javascripts/mathjax.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>
